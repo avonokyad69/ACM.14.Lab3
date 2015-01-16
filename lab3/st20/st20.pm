@@ -4,7 +4,7 @@ use CGI;
 use DBI;
 
 my $n = new CGI;
-my $region;
+my $student;
 my $selfurl = "lab3.cgi";
 my $dbh; 
 
@@ -13,7 +13,7 @@ my $dbh;
 sub st20
 {
     my ($q, $global) = @_;
-    $region = $global->{region};
+    $student = $global->{student};
 	print "Content-type: text/html; charset=windows-1251\n\n";
 
 	ShowHeader ();
@@ -48,7 +48,7 @@ ENDOFHTML
 
 sub ShowList
 {
-	$dbh  =   DBI->connect("DBI:mysql:db;localhost:3306", "root", "1234", {RaiseError=>1, AutoCommit=>1});
+	$dbh  =   DBI->connect("DBI:mysql:db;localhost:8889", "root", "root", {RaiseError=>1, AutoCommit=>1});
 	ShowForm() unless ($n->param('type') eq 'edit');
 
 	print <<STARTLIST;
@@ -66,7 +66,7 @@ sub ShowList
 </tr>
 STARTLIST
 
-	my $sth = $dbh->prepare("select * from studlist");
+	my $sth = $dbh->prepare("select * from areas");
 	$sth->execute();
 
 	while(my $item = $sth->fetchrow_hashref)
@@ -89,17 +89,17 @@ sub ShowForm
 <table>
 <tr>
 <form action = $selfurl method = "post">
-<input type = "hidden" Size = "region" value = $region/>
+<input type = "hidden" name = "student" value = $student/>
 <td width > 
-<input required type = "text" Size = "Region" size = 29 maxlength = 160 value = "$item->{Region}" > </td>
+<input required type = "text" name = "Region" size = 29 maxlength = 160 value = "$item->{Region}" > </td>
 <td width >
-<input required type = "text" Size = "Department" size = 29 maxlength = 30 value = "$item->{Department}"></td>
+<input required type = "text" name = "Department" size = 29 maxlength = 30 value = "$item->{Department}"></td>
 <td width > 
-<input required type = "number" Size = "Employee" min = 15 max = 99 size = 10 maxlength = 2 value = $item->{Employee}></td>
+<input required type = "number" name = "Employee" min = 15 max = 99 size = 10 maxlength = 2 value = $item->{Employee}></td>
 <td width = 100> 
-<input type = "checkbox" Size = "Prpost"  $checked value = 1 >  Praepostor</td>
-<input type = "hidden" Size = "type" value = "doedit">
-<input type = "hidden" Size = "id" value = $item->{id}>
+<input type = "checkbox" name = "Prpost"  $checked value = 1 > Praepostor </td>
+<input type = "hidden" name = "type" value = "doedit">
+<input type = "hidden" name = "id" value = $item->{id}>
 <td width = 50> 
 <input type = "submit" width = 40 value = "+"</td>
 </tr>
@@ -118,27 +118,27 @@ sub PrintItem
 <p align=left>
 
 <tr>
-<td width  bgcolor = #7FC4FF> 
+<td width  bgcolor = #F0F8FF> 
 $item->{Region}</td>
  
-<td width  bgcolor = #7FC4FF> 
+<td width  bgcolor = #F0F8FF> 
 $item->{Department}</td> 
 
-<td width  bgcolor = #7FC4FF> 
+<td width  bgcolor = #F0F8FF> 
 $item->{Employee} </td >
-<td width bgcolor = #7FC4FF align = center> $Prpost </td>
+<td width bgcolor = #F0F8FF align = center> $Prpost </td>
 <td>
 <form action = $selfurl method = post>
-<input type = "hidden" Size = "region" value = $region/>
-<input type = "hidden" Size = "type" value = "dodelete">
-<input type = "hidden" Size = "id" value =  $item->{id}>
+<input type = "hidden" name = "student" value = $student/>
+<input type = "hidden" name = "type" value = "dodelete">
+<input type = "hidden" name = "id" value =  $item->{id}>
 <input type = "submit" value = "-"></td>
 </form>
 <td width = 100 >
 <form action = $selfurl method = post>
-<input type = "hidden" Size = "region" value = $region/>
-<input type = "hidden" Size = "type" value = "edit">
-<input type = "hidden" Size = "id"   value =  $item->{id}>
+<input type = "hidden" name = "student" value = $student/>
+<input type = "hidden" name = "type" value = "edit">
+<input type = "hidden" name = "id"   value =  $item->{id}>
 <input type = "submit" value = "Edit"></td>
 </form>
 </tr>
@@ -148,8 +148,8 @@ ENDOFITEM
 
 sub DoEdit
 {
-	$dbh  =   DBI->connect("DBI:mysql:db;localhost:3306", "root", "1234", {RaiseError=>1, AutoCommit=>1});
-	my $id =$dbh->prepare("select count(*) from studlist");
+	$dbh  =   DBI->connect("DBI:mysql:db;localhost:8889", "root", "root", {RaiseError=>1, AutoCommit=>1});
+	my $id =$dbh->prepare("select count(*) from areas");
 	$id->execute();
 	$id++;
 	my $Prpost = 0 + $n->param('Prpost');
@@ -158,24 +158,24 @@ sub DoEdit
 	my $Region = $dbh->quote($n->param('Region'));
 	my $Department = $dbh -> quote ($n->param('Department'));
 		
-	$dbh->do("replace into studlist values($id, $Region, $Department, $Employee, $Prpost)");
+	$dbh->do("replace into areas values($id, $Region, $Department, $Employee, $Prpost)");
 	$dbh -> disconnect();
 }
 
 sub DoDelete
 {
-	$dbh  =   DBI->connect("DBI:mysql:db;localhost:3306", "root", "1234", {RaiseError=>1, AutoCommit=>1});
+	$dbh  =   DBI->connect("DBI:mysql:db;localhost:8889", "root", "root", {RaiseError=>1, AutoCommit=>1});
 	my $id = 0+$n->param('id');
-	$dbh -> do ("delete from studlist where id = $id");
+	$dbh -> do ("delete from areas where id = $id");
 	$dbh -> disconnect();
 }
 
 sub Edit
 {
-	$dbh  =   DBI->connect("DBI:mysql:db;localhost:3306", "root", "1234", {RaiseError=>1, AutoCommit=>1});
+	$dbh  =   DBI->connect("DBI:mysql:db;localhost:8889", "root", "root", {RaiseError=>1, AutoCommit=>1});
 	my $id = 0+$n->param('id');
 	ShowForm(GetItem(0+$n->param('id')));
-	$dbh->do("delete from studlist where id=$id");
+	$dbh->do("delete from areas where id=$id");
 	$dbh -> disconnect();
 	
 }
@@ -183,7 +183,7 @@ sub Edit
 sub GetItem 
 {
 	my ($id) = @_;
-	my $sth = $dbh->prepare("select * from studlist where id=$id");
+	my $sth = $dbh->prepare("select * from areas where id=$id");
 	$sth->execute();
 
 	if(my $item = $sth->fetchrow_hashref)
